@@ -1,94 +1,114 @@
-package temp;
-
-import java.util.*;
 import java.io.*;
+import java.util.*;
+
+class Pair {
+    int v; //도착 정점.
+    int weight;//무게
+
+    Pair(int a, int b) {
+        v = a;
+        weight = b;
+    }
+}
 
 public class Main {
+    public static int distance[];
+    public static PriorityQueue<Pair> pq = new PriorityQueue<>((a, b) -> a.weight - b.weight);//오름차순.
 
-	public static void main(String[] args) throws IOException {
-		FastReader fr = new FastReader();
-		int n = fr.nextInt();
-		int m = fr.nextInt();
-		int max = (int)1e9; //처음에 10000001 로 Inf값을 너무 작게 설정해주어 에러가남. 
-		// n개의 도시 m 개의 버스 각 버스는 비용이 있다.
-		//출발 도시 번호, 버스 정보는  : 시작 도시 a
-		int[][] map = new int[n][n];
-		
-		for(int i  =0 ;i < n; i++) {
-			Arrays.fill(map[i],(int) max);
-		}
-		
-		for (int i = 0; i < m; i++) {
-			int x= fr.nextInt()-1;
-			int y = fr.nextInt()-1;
-			int val = fr.nextInt();
-			map[x][y] = Math.min(val, map[x][y]);
-		}
-		
-		
-		for(int k = 0 ; k < n; k++) {
-			for(int i = 0 ; i < n; i++) {
-				for(int j = 0 ; j < n ;j++) {
-//					if(map[i][j] > map[i][k] + map[k][j])
-//						map[i][j] = map[i][k] + map[k][j];
-					map[i][j] = Math.min(map[i][j],  map[i][k]+map[k][j]);
-				}
-			}
-		}
-		for(int i = 0 ; i< n ;i++) {
-			map[i][i] = 0; //자기 자신에 대한 비용 0 
-		}
-		for(int i =0 ;i < n ;i++) {
-			for(int j = 0 ; j < n;j++) {
-				if(map[i][j] == max)map[i][j] = 0;
-				System.out.print(map[i][j]+" ");
-			}
-		System.out.println();}
-	}
+    public static void main(String[] args) throws IOException {
+        FastReader fr = new FastReader();
+        int V = fr.nextInt(), E = fr.nextInt();
+        int K = fr.nextInt(); //시작 정점의 번호
+        ArrayList<ArrayList<Pair>> graph = new ArrayList<>();
+        for (int i = 0; i <= V; i++) {
+            graph.add(new ArrayList<>());
+        }
 
-	public static class FastReader {
-		BufferedReader br;
-		StringTokenizer st;
+        distance = new int[V + 1];
+        Arrays.fill(distance, (int) 1e9);
+        for (int i = 0; i < E; i++) {
+            int a = fr.nextInt();
+            int b = fr.nextInt();
+            int c = fr.nextInt();
+         graph.get(a).add(new Pair(b, c));//a --> b costs c
+        }
 
-		public FastReader() {
-			br = new BufferedReader(new InputStreamReader(System.in));
-		}
+        helper(K,graph);
+        printAll();
+    }
 
-		public FastReader(String s) throws FileNotFoundException {
-			br = new BufferedReader(new FileReader(new File(s)));
-		}
+    public static void printAll() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < distance.length; i++) {
+            if (distance[i] == (int) 1e9) sb.append("INF\n");
+            else
+                sb.append(Integer.toString(distance[i]) + "\n");
+        }
+        System.out.println(sb);
+    }
 
-		String next() {
-			while (st == null || !st.hasMoreElements()) {
-				try {
-					st = new StringTokenizer(br.readLine());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			return st.nextToken();
-		}
+    public static void helper(int start, ArrayList<ArrayList<Pair>> graph ) {
+      distance[start] = 0 ;//시작 정점은 0 으로 초기화.
+        for(Pair nextV : graph.get(start)) {
+            distance[nextV.v] = Math.min(nextV.weight, distance[nextV.v]);//중복 되는 간선 제거.
+            pq.offer(nextV);//간선 추가
+        }
+        while(!pq.isEmpty()){
+            Pair cur = pq.poll();//가장 짧은 간선 꺼낸다ㅏ.
+            if(distance[cur.v] < cur.weight)//중복 간선 제거.
+                continue;
+            for(Pair nextV : graph.get(cur.v)){
+                if(distance[nextV.v] > distance[cur.v] + nextV.weight){//다음 정점 거쳐가는게 이득이면.
+                    distance[nextV.v] = distance[cur.v] + nextV.weight;
+                    pq.offer(new Pair(nextV.v,distance[nextV.v]));
+                }
+            }
+        }
+    }
 
-		int nextInt() {
-			return Integer.parseInt(next());
-		}
+    public static class FastReader {
+        BufferedReader br;
+        StringTokenizer st;
 
-		long nextLong() {
-			return Long.parseLong(next());
-		}
+        public FastReader() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
 
-		double nextDouble() {
-			return Double.parseDouble(next());
-		}
+        public FastReader(String s) throws FileNotFoundException {
+            br = new BufferedReader(new FileReader(new File(s)));
+        }
 
-		String nextLine() {
-			String str = "";
-			try {
-				str = br.readLine();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return str;
-		}
-	}
+        String next() {
+            while (st == null || !st.hasMoreElements()) {
+                try {
+                    st = new StringTokenizer(br.readLine());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() {
+            return Integer.parseInt(next());
+        }
+
+        long nextLong() {
+            return Long.parseLong(next());
+        }
+
+        double nextDouble() {
+            return Double.parseDouble(next());
+        }
+
+        String nextLine() {
+            String str = "";
+            try {
+                str = br.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return str;
+        }
+    }
 }
