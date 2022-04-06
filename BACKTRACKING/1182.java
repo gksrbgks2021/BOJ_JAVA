@@ -5,7 +5,6 @@ class Main{
     static int answer = 0;
     static StringTokenizer st ;
     static int[] arr;
-    static boolean visit[];
     static int count= 0 ;
     public static void main(String[] argv) throws IOException{
         StringWriter sw  =new StringWriter ();
@@ -16,7 +15,6 @@ class Main{
    int n = Integer.parseInt( st.nextToken());
    int s = Integer.parseInt( st.nextToken());
     arr = new int[n];
-    visit = new boolean[n];
     
    nextLine(br.readLine());
    
@@ -38,11 +36,8 @@ class Main{
     	return;	
     	}
     	for(int i = depth; i< arr.length; i++) {
-    		if(visit[i])continue;
 //pl();
-    		visit[i] = true;
     		dfs(i+1, sum+arr[i] , target);
-    		visit[i] = false;
     	}
     }
     public static void pl() {
